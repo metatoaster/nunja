@@ -2,7 +2,7 @@
 
 var NUNJA_PRECOMP_NS = '__nunja__';
 
-var RequireJSLoader = function(registry) {
+var AMDLoader = function(registry) {
     this.registry = registry;
 
     // async is always used to maximize usability, portability and
@@ -15,7 +15,7 @@ var RequireJSLoader = function(registry) {
 };
 
 
-RequireJSLoader.prototype.getSource = function(name, callback) {
+AMDLoader.prototype.getSource = function(name, callback) {
     var self = this;
     var template_path = self.registry.lookup_path(name);
     var mold_id = self.registry.name_to_mold_id(name);
@@ -65,6 +65,65 @@ RequireJSLoader.prototype.getSource = function(name, callback) {
 };
 
 
-exports.RequireJSLoader = RequireJSLoader;
-// the "default" loader under the "default" name.
-exports.NunjaLoader = RequireJSLoader;
+var CJSLoader = function(registry) {
+    this.registry = registry;
+
+    // no need to async in webpack
+    this.async = false;
+
+    // TODO figure this one out.
+    this.noCache = true;
+};
+
+
+CJSLoader.prototype.getSource = function(name, callback) {
+    var self = this;
+    var template_path = self.registry.lookup_path(name);
+    var mold_id = self.registry.name_to_mold_id(name);
+    var module_name = NUNJA_PRECOMP_NS + '/' + mold_id;
+    debugger;
+
+    var process = function(template_str) {
+        callback(null, {
+            'src': template_str,
+            'path': name,
+            'noCache': self.noCache,
+        });
+    };
+
+    var compile_template = function () {
+        require([template_path], process, function(err) {
+            // TODO figure out what actually should be passed...
+            callback(err);
+        });
+    };
+
+    var get_precompiled = function(precompiled) {
+        if (precompiled && precompiled[name]) {
+            callback(null, {
+                'src': {
+                    'type': 'code',
+                    'obj': precompiled[name]
+                },
+                'path': name
+            });
+            return true;
+        }
+        compile_template();
+    };
+
+    process(require(template_path));
+};
+
+
+exports.AMDLoader = AMDLoader;
+exports.CJSLoader = CJSLoader;
+
+// the "default" loader under the "default" name
+
+if (typeof define === 'function' && define.amd) {
+    exports.NunjaLoader = AMDLoader;
+}
+else {
+    exports.NunjaLoader = CJSLoader;
+}
