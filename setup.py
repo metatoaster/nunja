@@ -73,7 +73,11 @@ setup(
             'nunjucks': 'nunjucks/browser/nunjucks.js',
         },
     },
+    build_calmjs_artifacts=True,
     entry_points={
+        'calmjs.artifacts': [
+            'nunja.js = calmjs.rjs.artifact:complete_rjs',
+        ],
         'calmjs.registry': [
             'nunja.mold = nunja.registry:MoldRegistry',
             'nunja.mold.tests = nunja.registry:MoldRegistry',
