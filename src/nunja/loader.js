@@ -121,9 +121,10 @@ exports.CJSLoader = CJSLoader;
 
 // the "default" loader under the "default" name
 
-if (typeof define === 'function' && define.amd) {
-    exports.NunjaLoader = AMDLoader;
-}
-else {
-    exports.NunjaLoader = CJSLoader;
-}
+// if (typeof define === 'function' && define.amd) {
+//     exports.NunjaLoader = AMDLoader;
+// }
+// else {
+//     exports.NunjaLoader = CJSLoader;
+// }
+exports.NunjaLoader = CJSLoader;
